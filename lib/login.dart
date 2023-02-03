@@ -4,7 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 const double defaultPadding = 16.0;
 
 class Background extends StatelessWidget {
+  
   final Widget child;
+  final String topImage, bottomImage;
+
   const Background({
     Key? key,
     required this.child,
@@ -12,12 +15,11 @@ class Background extends StatelessWidget {
     this.bottomImage = "assets/images/login_bottom.png",
   }) : super(key: key);
 
-  final String topImage, bottomImage;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: SizedBox(
         width: double.infinity,
         height: MediaQuery.of(context).size.height,
@@ -34,13 +36,16 @@ class Background extends StatelessWidget {
             SafeArea(
                 child:
                     Padding(padding: const EdgeInsets.all(16), child: child)),
-            // Align(
-            //   alignment: Alignment.bottomRight,
-            //   child: Image.asset(
-            //     bottomImage,
-            //     width: 120,
-            //   ),
-            // ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Visibility(
+                visible: MediaQuery.of(context).viewInsets.bottom == 0,
+                child: Image.asset(
+                  bottomImage,
+                  width: 120,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -69,7 +74,7 @@ class MobileLoginScreen extends StatelessWidget {
               children: [
                 const Spacer(),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: SvgPicture.asset("assets/icons/login.svg"),
                 ),
                 const Spacer(),
@@ -81,9 +86,9 @@ class MobileLoginScreen extends StatelessWidget {
                 children: [
                   TextField(
                     decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(defaultPadding),
-                          child: Icon(Icons.person),
+                        prefixIcon: const Padding(
+                          padding:  EdgeInsets.all(defaultPadding),
+                          child:  Icon(Icons.person),
                         ),
                         hintText: "Your email",
                         contentPadding: const EdgeInsets.all(15),
@@ -123,7 +128,6 @@ class MobileLoginScreen extends StatelessWidget {
                       onPressed: () {
                         print("Doing everything");
                       },
-                      child: const Text("LOGIN"),
                       style: ElevatedButton.styleFrom(
                         textStyle: const TextStyle(
                           fontSize: 14,
@@ -140,6 +144,7 @@ class MobileLoginScreen extends StatelessWidget {
                         ),
                         tapTargetSize: MaterialTapTargetSize.padded,
                       ),
+                      child: const Text("LOGIN"),
                     ),
                   ),
                   const SizedBox(
