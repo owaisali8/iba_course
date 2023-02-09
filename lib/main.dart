@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iba_course/login.dart';
+import 'package:iba_course/login_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const RestartWidget(child:MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -14,8 +14,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      debugShowCheckedModeBanner: false,
-      home: const MobileLoginScreen(),
+      debugShowCheckedModeBanner: true,
+      home: const LoginScreen(),
     );
   }
 }
