@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iba_course/login_screen.dart';
+import 'package:iba_course/views/comments_view.dart';
 
 void main() {
-  runApp(const RestartWidget(child:MyApp()));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -10,12 +10,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sign In Screen',
+      title: 'Comment',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: true,
-      home: const LoginScreen(),
+      home: const CommentsScreen(),
     );
   }
 }
