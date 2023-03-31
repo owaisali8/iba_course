@@ -77,7 +77,7 @@ class CalculatorApp extends StatelessWidget {
             ),
             Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               customButton(context, '0', Colors.grey.shade800, 1.55,
-                  width: 150,
+                  width: 160,
                   align: Alignment.centerLeft,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50))),
