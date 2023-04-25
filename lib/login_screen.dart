@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:twitter_login/twitter_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -186,46 +187,60 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: defaultPadding * 1),
               const SocialSignUp(),
               const SizedBox(height: defaultPadding * 1),
-               GestureDetector(
-          onTap: () async {
-            await signInWithTwitter();
-            Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const HomePage()));
-            
-          },
-          child: Container(
-          width: 130,
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.blue[400],
-              border: Border.all(
-                width: 1,
-                color: Colors.transparent,
-              ),
-              borderRadius: BorderRadius.circular(40),
-              shape: BoxShape.rectangle,
-            ),
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/twitter.svg',
-                  height: 20,
-                  width: 20,
-                  color: Colors.white,
+              GestureDetector(
+                onTap: () async {
+                  await signInWithTwitter();
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HomePage()));
+                },
+                child: Container(
+                  width: 130,
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[400],
+                    border: Border.all(
+                      width: 1,
+                      color: Colors.transparent,
+                    ),
+                    borderRadius: BorderRadius.circular(40),
+                    shape: BoxShape.rectangle,
+                  ),
+                  child: Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/twitter.svg',
+                        height: 20,
+                        width: 20,
+                        color: Colors.white,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: CustomText(
+                            primaryColor: Colors.white,
+                            text: "TWITTER",
+                            fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: CustomText(
-                      primaryColor: Colors.white,
-                      text: "TWITTER",
-                      fontWeight: FontWeight.w600),
-                )
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: defaultPadding * 1),
+              ),
+              const SizedBox(height: defaultPadding * 1),
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SignUpPage()));
+                },
+                child: const Text('Sign Up'),
+              ),
+              const SizedBox(height: defaultPadding * 1),
               IconButton(
                   splashRadius: 1,
                   onPressed: () {
@@ -371,9 +386,9 @@ class SocialSignUp extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () async {
-             await signInWithFacebook();
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const HomePage()));
+            await signInWithFacebook();
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const HomePage()));
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -408,10 +423,9 @@ class SocialSignUp extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () async {
-            
-              await signInWithGoogle();
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const HomePage()));
+            await signInWithGoogle();
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const HomePage()));
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -470,10 +484,9 @@ Future<UserCredential> signInWithGoogle() async {
 Future<UserCredential> signInWithTwitter() async {
   // Create a TwitterLogin instance
   final twitterLogin = new TwitterLogin(
-    apiKey: 'iCaXS5OO9kArLYCkrfnhvQEjr',
-    apiSecretKey:'wd7thxCDmVAs8MY7aZMgNgcbfm8maFAJOryV5jNFrSWsS34Xp8',
-    redirectURI: 'flutter-twitter-login://'
-  );
+      apiKey: 'iCaXS5OO9kArLYCkrfnhvQEjr',
+      apiSecretKey: 'wd7thxCDmVAs8MY7aZMgNgcbfm8maFAJOryV5jNFrSWsS34Xp8',
+      redirectURI: 'flutter-twitter-login://');
 
   // Trigger the sign-in flow
   final authResult = await twitterLogin.login();
@@ -485,17 +498,17 @@ Future<UserCredential> signInWithTwitter() async {
   );
 
   // Once signed in, return the UserCredential
-  return await FirebaseAuth.instance.signInWithCredential(twitterAuthCredential);
+  return await FirebaseAuth.instance
+      .signInWithCredential(twitterAuthCredential);
 }
 
 Future<UserCredential> signInWithFacebook() async {
   // Trigger the sign-in flow
-  final LoginResult loginResult = await FacebookAuth.instance.login(
-      permissions: ['email', 'user_birthday']
-  );
+  final LoginResult loginResult = await FacebookAuth.instance.login();
 
   // Create a credential from the access token
-  final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
+  final OAuthCredential facebookAuthCredential =
+      FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
   // Once signed in, return the UserCredential
   return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
@@ -551,5 +564,304 @@ class HomePage extends StatelessWidget {
         child: const Text('Logout'),
       )),
     ));
+  }
+}
+
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color.fromARGB(255, 245, 95, 90);
+    final emailController = TextEditingController();
+    final pwdController = TextEditingController();
+    final firstName = TextEditingController();
+    final lastName = TextEditingController();
+
+    return SafeArea(
+        child: Scaffold(
+      body: SingleChildScrollView(
+          child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: defaultPadding * 3),
+            Form(
+                child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: defaultPadding * 2),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomText(
+                      text: "FIRST NAME",
+                      primaryColor: primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: defaultPadding * 2),
+                  child: LogInTextField(
+                    primaryColor: primaryColor,
+                    hintText: "John",
+                    type: "name",
+                    myController: firstName,
+                  ),
+                ),
+                const SizedBox(height: defaultPadding * 2),
+                const Padding(
+                  padding: EdgeInsets.only(left: defaultPadding * 2),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomText(
+                      text: "LAST NAME",
+                      primaryColor: primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: defaultPadding * 2),
+                  child: LogInTextField(
+                    primaryColor: primaryColor,
+                    hintText: "Smith",
+                    type: "name",
+                    myController: lastName,
+                  ),
+                ),
+                const SizedBox(height: defaultPadding * 2),
+                const Padding(
+                  padding: EdgeInsets.only(left: defaultPadding * 2),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomText(
+                      text: "GENDER",
+                      primaryColor: primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const RadioList(),
+                const SizedBox(height: defaultPadding * 2),
+                const Padding(
+                  padding: EdgeInsets.only(left: defaultPadding * 2),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomText(
+                      text: "EMAIL",
+                      primaryColor: primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: defaultPadding * 2),
+                  child: LogInTextField(
+                    primaryColor: primaryColor,
+                    hintText: "user@live.com",
+                    type: "email",
+                    myController: emailController,
+                  ),
+                ),
+                const SizedBox(height: defaultPadding * 2),
+                const Padding(
+                  padding: EdgeInsets.only(left: defaultPadding * 2),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomText(
+                      text: "PASSWORD",
+                      primaryColor: primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: defaultPadding * 2),
+                  child: LogInTextField(
+                    primaryColor: primaryColor,
+                    hintText: "*********",
+                    type: "password",
+                    myController: pwdController,
+                  ),
+                )
+              ],
+            )),
+            const SizedBox(height: defaultPadding * 2),
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    minimumSize: const Size(300, 60)),
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                            email: emailController.text,
+                            password: pwdController.text);
+                    log(userCredential.toString());
+                    FirebaseFirestore db = FirebaseFirestore.instance;
+
+                    db.collection("users").doc(emailController.text).set(Nadra(
+                          firstName: firstName.text,
+                          lastName: lastName.text,
+                          email: emailController.text,
+                          gender: gender,
+                        ).toJson());
+
+                    Navigator.pop(context);
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      showDialog<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                                title: const Text(
+                                    'The password provided is too weak.'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, 'Cancel'),
+                                    child: const Text('Ok'),
+                                  ),
+                                ]);
+                          });
+                    } else if (e.code == 'email-already-in-use') {
+                      showDialog<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                                title: const Text(
+                                    'The account already exists for that email.'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, 'Cancel'),
+                                    child: const Text('Ok'),
+                                  ),
+                                ]);
+                          });
+                    }
+                  }
+                },
+                child: const CustomText(
+                  primaryColor: Colors.white,
+                  text: "Sign Up",
+                  fontWeight: FontWeight.w500,
+                )),
+            const SizedBox(height: defaultPadding * 1),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: const TextStyle(fontSize: 20),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      )),
+    ));
+  }
+}
+
+String gender = "male";
+
+class RadioList extends StatefulWidget {
+  const RadioList({super.key});
+
+  @override
+  State<RadioList> createState() => _RadioListState();
+}
+
+class _RadioListState extends State<RadioList> {
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color.fromARGB(255, 245, 95, 90);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        RadioListTile(
+          activeColor: primaryColor,
+          visualDensity: const VisualDensity(vertical: -3),
+          title: const Text("Male"),
+          value: "male",
+          groupValue: gender,
+          onChanged: (value) {
+            setState(() {
+              gender = 'male';
+            });
+          },
+        ),
+        RadioListTile(
+          activeColor: primaryColor,
+          visualDensity: const VisualDensity(vertical: -3),
+          title: const Text("Female"),
+          value: "female",
+          groupValue: gender,
+          onChanged: (value) {
+            setState(() {
+              gender = 'female';
+            });
+          },
+        ),
+        RadioListTile(
+          activeColor: primaryColor,
+          visualDensity: const VisualDensity(vertical: -3),
+          title: const Text("Other"),
+          value: "other",
+          groupValue: gender,
+          onChanged: (value) {
+            setState(() {
+              gender = value.toString();
+            });
+          },
+        )
+      ],
+    );
+  }
+}
+
+class Nadra {
+  String firstName;
+  String lastName;
+  String email;
+  String gender;
+
+  Nadra({
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.gender,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "firstName": firstName,
+      "lastName": lastName,
+      "email": email,
+      "gender": gender,
+    };
+  }
+
+  factory Nadra.fromJson(Map<String, dynamic> json) {
+    final firstName = json['firstName'] as String;
+    final lastName = json['lastName'] as String;
+    final email = json['email'] as String;
+    final gender = json['gender'] as String;
+
+    return Nadra(
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      gender: gender,
+    );
   }
 }
