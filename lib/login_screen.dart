@@ -1,3 +1,8 @@
+import 'dart:developer';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:twitter_login/twitter_login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,6 +23,8 @@ class LoginScreen extends StatelessWidget {
     if (isDarkMode) {
       bgColor = Colors.black;
     }
+    final emailController = TextEditingController();
+    final pwdController = TextEditingController();
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -44,8 +51,8 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: defaultPadding * 4),
               Form(
                   child: Column(
-                children: const [
-                  Padding(
+                children: [
+                  const Padding(
                     padding: EdgeInsets.only(left: defaultPadding * 2),
                     child: Align(
                       alignment: Alignment.topLeft,
@@ -57,15 +64,17 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: defaultPadding * 2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: defaultPadding * 2),
                     child: LogInTextField(
                       primaryColor: primaryColor,
                       hintText: "user@live.com",
                       type: "email",
+                      myController: emailController,
                     ),
                   ),
-                  SizedBox(height: defaultPadding * 2),
-                  Padding(
+                  const SizedBox(height: defaultPadding * 2),
+                  const Padding(
                     padding: EdgeInsets.only(left: defaultPadding * 2),
                     child: Align(
                       alignment: Alignment.topLeft,
@@ -77,11 +86,13 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: defaultPadding * 2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: defaultPadding * 2),
                     child: LogInTextField(
                       primaryColor: primaryColor,
                       hintText: "*********",
                       type: "password",
+                      myController: pwdController,
                     ),
                   )
                 ],
@@ -106,8 +117,64 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       minimumSize: const Size(300, 60)),
-                  onPressed: () {
-                    //print("Log In pressed");
+                  onPressed: () async {
+                    try {
+                      final credential = await FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                              email: emailController.text,
+                              password: pwdController.text);
+                      log(credential.toString());
+                      // ignore: use_build_context_synchronously
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomePage()));
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'user-not-found') {
+                        showDialog<void>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                  title: const Text(
+                                      'No user found for that email.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, 'Cancel'),
+                                      child: const Text('Ok'),
+                                    ),
+                                  ]);
+                            });
+                      } else if (e.code == 'wrong-password') {
+                        showDialog<void>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                  title: const Text('Wrong email or password'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, 'Cancel'),
+                                      child: const Text('Ok'),
+                                    ),
+                                  ]);
+                            });
+                      } else {
+                        showDialog<void>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                  title: const Text("Wrong Email or password"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, 'Cancel'),
+                                      child: const Text('Ok'),
+                                    ),
+                                  ]);
+                            });
+                      }
+                    }
                   },
                   child: const CustomText(
                     primaryColor: Colors.white,
@@ -119,8 +186,48 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: defaultPadding * 1),
               const SocialSignUp(),
               const SizedBox(height: defaultPadding * 1),
+               GestureDetector(
+          onTap: () async {
+            await signInWithTwitter();
+            Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const HomePage()));
+            
+          },
+          child: Container(
+          width: 130,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue[400],
+              border: Border.all(
+                width: 1,
+                color: Colors.transparent,
+              ),
+              borderRadius: BorderRadius.circular(40),
+              shape: BoxShape.rectangle,
+            ),
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/twitter.svg',
+                  height: 20,
+                  width: 20,
+                  color: Colors.white,
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: CustomText(
+                      primaryColor: Colors.white,
+                      text: "TWITTER",
+                      fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: defaultPadding * 1),
               IconButton(
-                splashRadius: 1,
+                  splashRadius: 1,
                   onPressed: () {
                     isDarkMode = !isDarkMode;
                     RestartWidget.restartApp(context);
@@ -181,12 +288,14 @@ class LogInTextField extends StatelessWidget {
       {Key? key,
       required this.primaryColor,
       required this.hintText,
+      required this.myController,
       required this.type})
       : super(key: key);
 
   final Color primaryColor;
   final String hintText;
   final String type;
+  final TextEditingController myController;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +305,6 @@ class LogInTextField extends StatelessWidget {
     var maxLength = 50;
     var textColor = Colors.black;
     var hintTextColor = const Color.fromARGB(120, 0, 0, 0);
-    
 
     if (type == "password") {
       obsucre = true;
@@ -212,6 +320,7 @@ class LogInTextField extends StatelessWidget {
 
     return TextField(
         style: TextStyle(color: textColor),
+        controller: myController,
         maxLength: maxLength,
         obscureText: obsucre,
         cursorColor: primaryColor,
@@ -222,7 +331,7 @@ class LogInTextField extends StatelessWidget {
           focusedBorder:
               UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
           hintText: hintText,
-          hintStyle:  TextStyle(color: hintTextColor.withOpacity(0.5)),
+          hintStyle: TextStyle(color: hintTextColor.withOpacity(0.5)),
         ),
         keyboardType: keyboardType,
         textInputAction: textInputAction);
@@ -261,7 +370,11 @@ class SocialSignUp extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: () {},
+          onTap: () async {
+             await signInWithFacebook();
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const HomePage()));
+          },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.all(16),
@@ -294,7 +407,12 @@ class SocialSignUp extends StatelessWidget {
           ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () async {
+            
+              await signInWithGoogle();
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const HomePage()));
+          },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.all(16),
@@ -326,42 +444,112 @@ class SocialSignUp extends StatelessWidget {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }
 }
 
+Future<UserCredential> signInWithGoogle() async {
+  // Trigger the authentication flow
+  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  // Obtain the auth details from the request
+  final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
+
+  // Create a new credential
+  final credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth?.accessToken,
+    idToken: googleAuth?.idToken,
+  );
+
+  // Once signed in, return the UserCredential
+  return await FirebaseAuth.instance.signInWithCredential(credential);
+}
+
+Future<UserCredential> signInWithTwitter() async {
+  // Create a TwitterLogin instance
+  final twitterLogin = new TwitterLogin(
+    apiKey: 'iCaXS5OO9kArLYCkrfnhvQEjr',
+    apiSecretKey:'wd7thxCDmVAs8MY7aZMgNgcbfm8maFAJOryV5jNFrSWsS34Xp8',
+    redirectURI: 'flutter-twitter-login://'
+  );
+
+  // Trigger the sign-in flow
+  final authResult = await twitterLogin.login();
+
+  // Create a credential from the access token
+  final twitterAuthCredential = TwitterAuthProvider.credential(
+    accessToken: authResult.authToken!,
+    secret: authResult.authTokenSecret!,
+  );
+
+  // Once signed in, return the UserCredential
+  return await FirebaseAuth.instance.signInWithCredential(twitterAuthCredential);
+}
+
+Future<UserCredential> signInWithFacebook() async {
+  // Trigger the sign-in flow
+  final LoginResult loginResult = await FacebookAuth.instance.login(
+      permissions: ['email', 'user_birthday']
+  );
+
+  // Create a credential from the access token
+  final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+  // Once signed in, return the UserCredential
+  return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+}
+
 class RestartWidget extends StatefulWidget {
   const RestartWidget({super.key, this.child});
- 
+
   final Widget? child;
- 
+
   static void restartApp(BuildContext context) {
     context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
   }
- 
+
   @override
   State<StatefulWidget> createState() {
     return _RestartWidgetState();
   }
 }
- 
+
 class _RestartWidgetState extends State<RestartWidget> {
   Key key = UniqueKey();
- 
+
   void restartApp() {
     setState(() {
       key = UniqueKey();
     });
   }
- 
- 
+
   @override
   Widget build(BuildContext context) {
     return KeyedSubtree(
       key: key,
       child: widget.child ?? Container(),
     );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+        child: Scaffold(
+      body: Center(
+          child: ElevatedButton(
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          await GoogleSignIn().signOut();
+          Navigator.pop(context);
+        },
+        child: const Text('Logout'),
+      )),
+    ));
   }
 }

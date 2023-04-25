@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "602709803018",
+    "project_id": "assignment-4-17dce",
+    "storage_bucket": "assignment-4-17dce.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:602709803018:android:995864d48b2e3169b51ff3",
+        "android_client_info": {
+          "package_name": "com.example.iba_course"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "602709803018-os5ss5emo4t3v5gpq1nehtb1peto04ju.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.iba_course",
+            "certificate_hash": "80862b29f07dbd1adecc02dd0c642b4d036b9346"
+          }
+        },
+        {
+          "client_id": "602709803018-n3dk8je8f1oouholhvhmfsi7amvokcka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9v5TcxEpbktiqWY0HdxqksOqZlDepq-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "602709803018-n3dk8je8f1oouholhvhmfsi7amvokcka.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "602709803018-bditvocl689ht0pm4oq8jqqstrd1mjtb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ibaCourse"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
